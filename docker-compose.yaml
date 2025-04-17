@@ -1,0 +1,41 @@
+version: '3'
+
+services:
+  guacamole-db:
+    image: mysql:5.7
+    container_name: guac-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: some_password
+      MYSQL_DATABASE: guacamole_db
+      MYSQL_USER: guacamole_user
+      MYSQL_PASSWORD: guacamole_password
+    volumes:
+      - guac-db-data:/var/lib/mysql
+
+  guacd:
+    image: guacamole/guacd
+    container_name: guacd
+    restart: always
+
+  guacamole:
+    image: guacamole/guacamole
+    container_name: guacamole
+    restart: always
+    ports:
+      - "8080:8080"
+    links:
+      - guacd
+      - guacamole-db
+    environment:
+      GUACD_HOSTNAME: guacd
+      MYSQL_HOSTNAME: guacamole-db
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: guacamole_db
+      MYSQL_USER: guacamole_user
+      MYSQL_PASSWORD: guacamole_password
+    depends_on:
+      - guacd
+      - guacamole-db
+volumes:
+  guac-db-data:
